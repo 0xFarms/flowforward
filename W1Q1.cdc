@@ -13,11 +13,11 @@ pub struct Canvas {
 
 pub fun display(canvas: Canvas) {
     var frame: String = "+-----+"
-    log(framing)
+    log(frame)
     for e in canvas.pixels {
         log(("|").concat(e).concat("|"))
     }
-    log(framing)
+    log(frame)
 }
 
 pub fun main() {
