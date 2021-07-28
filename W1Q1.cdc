@@ -18,13 +18,6 @@ pub fun display(pixels: [String]) {
 	log(frame)
 }
 
-pub resource Picture {
-	pub let canvas: Canvas
-	init(canvas: Canvas) {
-		self.canvas = canvas
-	}
-}
-
 pub fun main() {
 	let pattern = [
         "*   *",
