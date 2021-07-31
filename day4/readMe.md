@@ -205,7 +205,7 @@ If successful, we should see 5 events from executing this transaction.
 ```sh
 flow scripts execute ./LocalArtist/scripts/getCanvases.cdc \
   --network=testnet \
-  --args-json='[{"type": "Address", "value": "0x01"}]'
+  --args-json='[{"type": "Address", "value": "0x1dfdc8ae84f8fdd6"}]'
 ```
 
 And our script should display a `Collection` with one picture in it.
