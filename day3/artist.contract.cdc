@@ -1,5 +1,9 @@
 pub contract Artist {
 
+//NEW W1Q5 - events
+pub event PicturePrintSuccess(pixels: String)
+pub event PicturePrintFailure(pixels: String)
+
 //NEW W1Q3 - Collection resource, PictureReceiver interface, createCollection()
   pub resource interface PictureReceiver {
     pub fun deposit(picture: @Picture)
@@ -91,9 +95,14 @@ pub contract Artist {
         let picture <- create Picture(canvas: canvas)
         self.prints[canvas.pixels] = canvas
 
-        return <- picture
-      } else {
+        //NEW for W1Q5: emit PicturePrintSuccess(pixels: String)
+        emit PicturePrintSuccess(pixels: pixels)
 
+        return <- picture
+
+      } else {
+        //NEW for W1Q5: emit PicturePrintFailure(pixels: String)
+        emit PicturePrintFailure(pixels: pixels)
         return nil
       }
     }
