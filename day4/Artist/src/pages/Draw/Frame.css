@@ -1,6 +1,0 @@
-.frame {
-  display: block;
-}
-.frame > .pixel.is-interactive {
-  cursor: pointer;
-}

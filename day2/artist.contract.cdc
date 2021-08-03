@@ -1,18 +1,71 @@
 pub contract Artist {
 
+//NEW W1Q3 ************************************
+
+  pub resource interface PictureReceiver {
+    pub fun deposit(picture: @Picture)
+    pub fun getCanvases(): [Canvas]
+  }
+
+  pub resource Collection: PictureReceiver {
+    pub let pictures: @[Picture]
+
+    pub fun deposit(picture: @Picture) {
+      self.pictures.append(<- picture)
+    }
+    pub fun withdraw(pixels: String): @Picture? {
+      var index = 0
+      while index < self.pictures.length {
+        if self.pictures[index].canvas.pixels == pixels {
+          return <- self.pictures.remove(at: index)
+        }
+        index = index + 1
+      }
+
+      return nil
+    }
+    pub fun getCanvases(): [Canvas] {
+      var canvases: [Canvas] = []
+      var index = 0
+      while index < self.pictures.length {
+        canvases.append(
+          self.pictures[index].canvas
+        )
+        index = index + 1
+      }
+
+      return canvases;
+    }
+
+    init() {
+      self.pictures <- []
+    }
+    destroy() {
+      destroy self.pictures
+    }
+  }
+
+  pub fun createCollection(): @Collection {
+    return <- create Collection()
+  }
+
+//************************************ /NEW W1Q3
+
+  // defines Canvas structure
   pub struct Canvas {
 
-    pub let width: UInt8
-    pub let height: UInt8
+    pub let width: Int
+    pub let height: Int
     pub let pixels: String
 
-    init(width: UInt8, height: UInt8, pixels: String) {
+    init(width: Int, height: Int, pixels: String) {
       self.width = width
       self.height = height
       self.pixels = pixels
     }
   }
 
+  // A resource that will store a single canvas
   pub resource Picture {
 
     pub let canvas: Canvas
@@ -20,28 +73,34 @@ pub contract Artist {
     init(canvas: Canvas) {
       self.canvas = canvas
     }
+
   }
 
+  // Printer ensures that only one picture can be printed for each canvas.
+  // It also ensures each canvas is correctly formatted (dimensions and pixels).
   pub resource Printer {
-
-    pub let width: UInt8
-    pub let height: UInt8
     pub let prints: {String: Canvas}
 
-    init(width: UInt8, height: UInt8) {
-      self.width = width;
-      self.height = height;
+    init() {
       self.prints = {}
     }
 
-    pub fun print(canvas: Canvas): @Picture? {
-      // Canvas needs to fit Printer's dimensions.
-      if canvas.pixels.length != Int(self.width * self.height) {
-        return nil
+    // possible synonyms for the word "canvas"
+    pub fun print(width: Int, height: Int, pixels: String): @Picture? {
+      // Canvas can only use visible ASCII characters.
+      for symbol in pixels.utf8 {
+        if symbol < 32 || symbol > 126 {
+          return nil
+        }
       }
 
       // Printer is only allowed to print unique canvases.
-      if self.prints.containsKey(canvas.pixels) == false {
+      if self.prints.containsKey(pixels) == false {
+        let canvas = Canvas(
+          width: width,
+          height: height,
+          pixels: pixels
+        )
         let picture <- create Picture(canvas: canvas)
         self.prints[canvas.pixels] = canvas
 
@@ -52,59 +111,23 @@ pub contract Artist {
     }
   }
 
-  //NEW W1Q3 ************************************************
-  pub resource Collection {
-    // create array to store pictures
-    pub let pictures: @[Picture]
-
-    // deposit (append) each Picture into array
-    pub fun deposit(picture: @Picture) {
-      self.pictures.append(<- picture)
-    }
-
-    // to return all the stored canvases
-    pub fun getCanvases(): [Canvas] {
-      var canvases: [Canvas] = []
-      var index = 0
-      while index < self.pictures.length {
-        canvases.append(self.pictures[index].canvas)
-        index = index + 1
-      }
-      return canvases
-    }
-
-    //init fields
-    init() {
-      self.pictures <- []
-    }
-
-    //destroy current Picture resource
-    destroy() {
-      destroy self.pictures
-    }
-  }
-  //************************************************/NEW W1Q3
   init() {
     self.account.save(
-      <- create Printer(width: 5, height: 5),
+      <- create Printer(),
       to: /storage/ArtistPicturePrinter
     )
     self.account.link<&Printer>(
       /public/ArtistPicturePrinter,
       target: /storage/ArtistPicturePrinter
     )
-  //NEW W1Q3 ************************************************
-    // init Collection resource in storage area
+
     self.account.save(
-      <- create Collection(),
+      <- self.createCollection(),
       to: /storage/ArtistPictureCollection
     )
-    // create symbolic link for public access to Collection
-    self.account.link<&Collection>(
-      /public/ArtistPictureCollection,
+    self.account.link<&{PictureReceiver}>(
+      /public/ArtistPictureReceiver,
       target: /storage/ArtistPictureCollection
     )
-  //************************************************/NEW W1Q3
   }
 }
-
