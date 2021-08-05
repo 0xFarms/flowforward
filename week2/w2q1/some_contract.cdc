@@ -4,7 +4,7 @@ access(all) contract SomeContract {
     pub struct SomeStruct {
         // 4 Variables
         //
-        pub(set) var a: String  	    //	read/write scope: all (var a can be read/modified from anything/anywhere)
+        pub(set) var a: String  	    // read/write scope: all (var a can be read/modified from anything/anywhere)
 
         pub var b: String	            // read scope: all (read from anywhere in contract, any script, any transaction)
 							            //	write scope: can only be overwritten in current + inner scope
